@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useHistory } from "react-router";
 import { Card, Form, Button, Toast, ToastContainer } from "react-bootstrap";
 import { getUserAuthTokenApi } from "../../api/authentication";
@@ -10,14 +10,14 @@ const LoginComponent = () => {
   const [successMsg, setSuccessMsg] = useState("");
   const history = useHistory();
 
-  useState(() => {
+  useEffect(() => {
     if (
       window.localStorage.getItem("token") !== null ||
       window.localStorage.getItem("role") !== null
     ) {
       history.push("/");
     }
-  }, []);
+  }, [history]);
 
   const [values, setValues] = useState({
     username: "",

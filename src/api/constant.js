@@ -1,4 +1,4 @@
-const url = "http://localhost:9090" //process.env.REACT_APP_BASE_URL
+const url = process.env.REACT_APP_BASE_URL || "http://localhost:9090";
 
 
 const customer = {

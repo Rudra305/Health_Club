@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/(signIn|showUser/.*|showTrainer/.*|showAllUser|showAllTrainers|signupUser|signupForTrainer|changePasswordUser|changePasswordTrainer|subscribeMembership|unsubscribeMembership|sendFeedback|showAllFeedbacks|activateAccountUser/.*|deactivateAccountUser/.*|activateAccountTrainer/.*|deactivateAccountTrainer/.*|deleteUser/.*|deleteTrainer/.*|showUserByFacility/.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

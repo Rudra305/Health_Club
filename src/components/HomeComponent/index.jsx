@@ -10,7 +10,7 @@ import ProfileComponent from "../ProfileComponent"
 import TrainerList from "../Admin/TrainerList"
 import CustomerList from "../Admin/CustomerList"
 import { useHistory } from "react-router"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { fetchUserApi } from "../../api/authentication"
 import { fetchApiWrapper } from "../../api/FetchApiWrapper"
 import FeedbackList from "../Admin/FeedbackList"
@@ -32,11 +32,11 @@ const HomeComponent = () => {
     const history = useHistory()
 
     //if token is not there revert to login page
-    useState(() => {
+    useEffect(() => {
         if (window.localStorage.getItem("token") === null || window.localStorage.getItem("role") === null) {
             history.push('/login')
         }
-    }, [])
+    }, [history])
 
 
 
@@ -52,7 +52,7 @@ const HomeComponent = () => {
     }
 
     //get userDetails
-    useState(() => {
+    useEffect(() => {
         fecthUserDetails()
     }, [])
 
