@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Alert, Badge, Table } from "react-bootstrap"
 import { showAllUserApi } from "../../api/authentication";
 import { fetchApiWrapper } from "../../api/FetchApiWrapper";
@@ -6,19 +6,19 @@ import { fetchApiWrapper } from "../../api/FetchApiWrapper";
 const TrainerLandingComponent = ({ userData = {} }) => {
     const [userList, setUserList] = useState([])
     const facility = userData.facility;
-    const showAllUser = async () => {
+
+    const showAllUser = useCallback(async () => {
         if (facility) {
-            const [{ statusCode, data }, error] = await fetchApiWrapper(() => showAllUserApi(facility.facilityName));
+            const [{ statusCode, data }] = await fetchApiWrapper(() => showAllUserApi(facility.facilityName));
             if (statusCode === 200) {
-                console.log(data)
                 setUserList(data)
             }
         }
-    }
+    }, [facility]);
+
     useEffect(() => {
-        console.log(userData)
         showAllUser()
-    }, [])
+    }, [showAllUser])
     return <div>
         <Alert variant="success">
             You're currently in charge of <strong className="text-uppercase">{facility?.facilityName}</strong> class

@@ -1,8 +1,7 @@
 import React from 'react'
-import { Button, Card, Form, Toast, ToastContainer, Col, Row, InputGroup, FormControl } from 'react-bootstrap'
+import { Button, Card, Form, Toast, ToastContainer, Col, Row } from 'react-bootstrap'
 import { useHistory } from 'react-router'
 import Select from 'react-select'
-import makeAnimated from 'react-select/animated'
 import { signupTrainerApi, signupUsernApi } from '../../api/authentication'
 import { fetchApiWrapper } from '../../api/FetchApiWrapper'
 import { Background, StyledCard, StyledContainer } from '../LoginComponent/styles'
@@ -16,10 +15,9 @@ const initial = {
     state: "",
     pincode: "",
     firstName: "",
-    gender: "",
     lastName: "",
+    gender: "",
     phoneNumber: '',
-    gender: '',
     facility: []
 }
 const SignupComponent = props => {
@@ -32,7 +30,7 @@ const SignupComponent = props => {
         if (window.localStorage.getItem("token") !== null || window.localStorage.getItem("role") !== null) {
             history.push('/')
         }
-    }, [])
+    }, [history])
     const options = [{ label: "Gym", value: "gym" }, { label: "Swimming", value: "swimming" }, { label: "Yoga", value: "yoga" }]
     const [values, setValues] = React.useState(initial)
 
@@ -103,8 +101,6 @@ const SignupComponent = props => {
             "username": values.username
         }
     }
-
-    const animatedComponents = makeAnimated();
 
     return <Background>
         <StyledContainer>

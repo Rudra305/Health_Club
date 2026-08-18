@@ -2,7 +2,7 @@ import React from 'react'
 import { Form, Toast, ToastContainer, Button } from 'react-bootstrap'
 import { FAB } from './styles'
 import { MdFeedback } from 'react-icons/md'
-import { fetchUserApi, sendFeedbackApi } from '../../api/authentication'
+import { sendFeedbackApi } from '../../api/authentication'
 import { fetchApiWrapper } from '../../api/FetchApiWrapper'
 
 const Feedback = () => {
@@ -12,8 +12,8 @@ const Feedback = () => {
     const [rating, setRating] = React.useState(1)
     const [feedback, setFeedback] = React.useState("")
     const sendFeedback = async () => {
-        const [{ statusCode, data },] = await fetchApiWrapper(() => sendFeedbackApi(feedback, rating), "Please provide valid name");
-        if (statusCode == 200) {
+        const [{ statusCode }] = await fetchApiWrapper(() => sendFeedbackApi(feedback, rating), "Please provide valid name");
+        if (statusCode === 200) {
             setRating(1)
             setFeedback("")
             setShow(false)

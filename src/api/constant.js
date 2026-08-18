@@ -11,7 +11,7 @@ const trainer = {
 
 }
 export const login = [url + '/signIn', 'POST']
-export const getUser = () => window.localStorage.getItem("role") == "TRAINER" ? trainer.showTrainer : customer.showCustomer
+export const getUser = () => window.localStorage.getItem("role") === "TRAINER" ? trainer.showTrainer : customer.showCustomer
 export const showAllUser = [url + '/showAllUser', 'GET']
 export const showAllTrainer = [url + '/showAllTrainers', 'GET']
 export const signupTrainer = [url + '/signupForTrainer', 'POST']

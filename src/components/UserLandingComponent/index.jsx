@@ -16,7 +16,7 @@ const UserLandingComponent = ({ data, resfreshData }) => {
     }
 
     const activateDeactivate = async (facility) => {
-        const [{ statusCode, data }, error] = await (facilitiesOpted.includes(facility) ? onSubmitUnsubscribe(facility) : onSubmitSubscribe(facility))
+        const [{ statusCode }] = await (facilitiesOpted.includes(facility) ? onSubmitUnsubscribe(facility) : onSubmitSubscribe(facility))
 
         if (statusCode === 200) {
             resfreshData()

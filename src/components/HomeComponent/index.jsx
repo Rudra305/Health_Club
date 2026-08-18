@@ -40,21 +40,20 @@ const HomeComponent = () => {
 
 
 
-    const fecthUserDetails = async () => {
-        const [{ statusCode, data },] = await fetchApiWrapper(() => fetchUserApi(window.localStorage.getItem("username")), "Please provide valid name");
-        if (statusCode == 200) {
+    const fecthUserDetails = useCallback(async () => {
+        const [{ statusCode, data }] = await fetchApiWrapper(() => fetchUserApi(window.localStorage.getItem("username")), "Please provide valid name");
+        if (statusCode === 200) {
             setUserData(data)
         } else {
             window.localStorage.clear();
             history.push('/login')
         }
-
-    }
+    }, [history]);
 
     //get userDetails
     useEffect(() => {
         fecthUserDetails()
-    }, [])
+    }, [fecthUserDetails])
 
 
     const logoutUser = () => {
