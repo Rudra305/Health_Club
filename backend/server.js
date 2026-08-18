@@ -21,6 +21,9 @@ const db = {
       lastName: 'Manager',
       email: 'admin@healthclub.com',
       phone: '9876543210',
+      mobileNo: '9876543210',
+      gender: 'M',
+      address: [{ houseNo: '101', city: 'Metro City', state: 'NY', pincode: '10001' }],
       role: 'ADMIN',
       facility: [],
       active: true
@@ -32,6 +35,9 @@ const db = {
       lastName: 'Doe',
       email: 'john@healthclub.com',
       phone: '9876543211',
+      mobileNo: '9876543211',
+      gender: 'M',
+      address: [{ houseNo: '204', city: 'Westfield', state: 'CA', pincode: '90210' }],
       role: 'TRAINER',
       facility: { facilityName: 'Gym' },
       active: true
@@ -43,6 +49,9 @@ const db = {
       lastName: 'Smith',
       email: 'sarah@healthclub.com',
       phone: '9876543212',
+      mobileNo: '9876543212',
+      gender: 'F',
+      address: [{ houseNo: '305', city: 'Oakridge', state: 'IL', pincode: '60007' }],
       role: 'TRAINER',
       facility: { facilityName: 'Yoga' },
       active: true
@@ -54,6 +63,9 @@ const db = {
       lastName: 'Phelps',
       email: 'mike@healthclub.com',
       phone: '9876543213',
+      mobileNo: '9876543213',
+      gender: 'M',
+      address: [{ houseNo: '112', city: 'Bayside', state: 'FL', pincode: '33101' }],
       role: 'TRAINER',
       facility: { facilityName: 'Swimming' },
       active: true
@@ -65,6 +77,9 @@ const db = {
       lastName: 'Rider',
       email: 'alex@example.com',
       phone: '9876543214',
+      mobileNo: '9876543214',
+      gender: 'M',
+      address: [{ houseNo: '501', city: 'Metro City', state: 'NY', pincode: '10002' }],
       role: 'CUSTOMER',
       facility: [{ facilityName: 'Gym' }, { facilityName: 'Swimming' }],
       active: true
@@ -76,6 +91,9 @@ const db = {
       lastName: 'Watson',
       email: 'emma@example.com',
       phone: '9876543215',
+      mobileNo: '9876543215',
+      gender: 'F',
+      address: [{ houseNo: '602', city: 'Greenwood', state: 'TX', pincode: '75001' }],
       role: 'CUSTOMER',
       facility: [{ facilityName: 'Yoga' }],
       active: true

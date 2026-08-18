@@ -35,15 +35,30 @@ const TrainerList = () => {
     useEffect(() => {
         getAllTrainer()
     }, [])
+    const formatAddress = (x) => {
+        if (x.address && Array.isArray(x.address) && x.address.length > 0) {
+            const a = x.address[0];
+            return `${a.houseNo || ''}, ${a.city || ''} ${a.state || ''}`.replace(/^,\s*/, '').trim() || 'N/A';
+        }
+        if (x.city) return `${x.houseNo ? x.houseNo + ', ' : ''}${x.city} ${x.state || ''}`.trim();
+        return 'N/A';
+    };
+
     const getAllTrainer = async () => {
-        const [{ statusCode, data }, error] = await fetchApiWrapper(() => showAllTrainerApi(window.localStorage.getItem("token")));
-        if (statusCode === 200) {
+        const [{ statusCode, data }] = await fetchApiWrapper(() => showAllTrainerApi(window.localStorage.getItem("token")));
+        if (statusCode === 200 && Array.isArray(data)) {
             setTrainers(data.map(x => {
-                return ['@' + x.username, x.firstName + ' ' + x.lastName, x.gender, x.mobileNo, x.address[0].houseNo + ', ' + x.address[0].city + ', ' + x.address[0].state, x.facility.facilityName, { "username": x.username, "active": x.active }]
-
+                const facName = typeof x.facility === 'object' ? (x.facility?.facilityName || 'Gym') : (x.facility || 'Gym');
+                return [
+                    '@' + x.username,
+                    x.firstName + ' ' + (x.lastName || ''),
+                    x.gender || 'M',
+                    x.mobileNo || x.phone || 'N/A',
+                    formatAddress(x),
+                    facName,
+                    { "username": x.username, "active": x.active }
+                ];
             }))
-        } else {
-
         }
     }
     const ActionsRenderer = ({ val }) => {

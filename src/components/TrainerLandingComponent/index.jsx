@@ -37,16 +37,23 @@ const TrainerLandingComponent = ({ userData = {} }) => {
                 </tr>
             </thead>
             <tbody>
-                {userList.map(x => 
-                <tr>
-                    <td>{x.username}</td>
-                    <td className='text-capitalize'>{x.firstName+' '+x.lastName}</td>
-                    <td>{x.mobileNo}</td>
-                    <td>{x.gender==='M'?"Male":"Female"}</td>
-                    <td>{x.address[0].houseNo+', '+x.address[0].city+' '+x.address[0].state}</td>
-                    <td>{x.facility.map(x=><Badge className='me-2'>{x.facilityName}</Badge>)}</td>
-                    <td>{x.active?<Badge>Active</Badge>:<Badge>Inactive</Badge>}</td>
-                </tr>)}
+                {userList.map((x, idx) => {
+                    const addr = x.address && Array.isArray(x.address) && x.address.length > 0
+                        ? `${x.address[0].houseNo || ''}, ${x.address[0].city || ''} ${x.address[0].state || ''}`.replace(/^,\s*/, '').trim()
+                        : (x.city ? `${x.city} ${x.state || ''}`.trim() : 'N/A');
+                    const facilities = Array.isArray(x.facility) ? x.facility : [];
+                    return (
+                        <tr key={x.username || idx}>
+                            <td>{x.username}</td>
+                            <td className='text-capitalize'>{x.firstName + ' ' + (x.lastName || '')}</td>
+                            <td>{x.mobileNo || x.phone || 'N/A'}</td>
+                            <td>{x.gender === 'M' ? "Male" : "Female"}</td>
+                            <td>{addr}</td>
+                            <td>{facilities.map((f, i) => <Badge key={i} bg="primary" className='me-1'>{f.facilityName || f}</Badge>)}</td>
+                            <td>{x.active ? <Badge bg="success">Active</Badge> : <Badge bg="secondary">Inactive</Badge>}</td>
+                        </tr>
+                    );
+                })}
             </tbody>
         </Table>
     </div>

@@ -32,16 +32,30 @@ const CustomerList = () => {
     useEffect(() => {
         getAllUser()
     }, [])
+    const formatAddress = (x) => {
+        if (x.address && Array.isArray(x.address) && x.address.length > 0) {
+            const a = x.address[0];
+            return `${a.houseNo || ''}, ${a.city || ''} ${a.state || ''}`.replace(/^,\s*/, '').trim() || 'N/A';
+        }
+        if (x.city) return `${x.houseNo ? x.houseNo + ', ' : ''}${x.city} ${x.state || ''}`.trim();
+        return 'N/A';
+    };
+
     const getAllUser = async () => {
-        const [{ statusCode, data }, error] = await fetchApiWrapper(() => showAllUserApi(window.localStorage.getItem("token")));
-        if (statusCode === 200) {
-
+        const [{ statusCode, data }] = await fetchApiWrapper(() => showAllUserApi(window.localStorage.getItem("token")));
+        if (statusCode === 200 && Array.isArray(data)) {
             setCustomers(data.map(x => {
-                return ['@' + x.username, x.firstName + ' ' + x.lastName, x.gender, x.mobileNo, x.address[0].houseNo + ', ' + x.address[0].city + ', ' + x.address[0].state, x.facility.map(y => y.facilityName), { "username": x.username, "active": x.active }]
-
+                const facilities = Array.isArray(x.facility) ? x.facility.map(y => y.facilityName || y) : [];
+                return [
+                    '@' + x.username,
+                    x.firstName + ' ' + (x.lastName || ''),
+                    x.gender || 'M',
+                    x.mobileNo || x.phone || 'N/A',
+                    formatAddress(x),
+                    facilities,
+                    { "username": x.username, "active": x.active }
+                ];
             }))
-        } else {
-
         }
     }
     const ActionsRenderer = ({ val }) => {
