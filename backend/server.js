@@ -2,21 +2,60 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 9090;
+
+// Security Enforcement: Require explicit JWT_SECRET in production
+if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+  throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable is missing in production deployment!');
+}
+
 const JWT_SECRET = process.env.JWT_SECRET || 'health_club_secret_jwt_key_2026';
+if (!process.env.JWT_SECRET) {
+  console.warn('⚠️ Security Warning: JWT_SECRET environment variable is not set. Using development fallback key.');
+}
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(morgan('dev'));
 
+// -------------------------------------------------------------
+// Security & Cryptographic Password Helpers (PBKDF2)
+// -------------------------------------------------------------
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 10000, 64, 'sha512').toString('hex');
+}
+
+function generateSalt() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
+function verifyPassword(inputPassword, storedHash, salt) {
+  const hashToCompare = hashPassword(inputPassword, salt);
+  const bufA = Buffer.from(storedHash, 'hex');
+  const bufB = Buffer.from(hashToCompare, 'hex');
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
+}
+
+function createSeededUser(userConfig, rawPassword) {
+  const salt = generateSalt();
+  const passwordHash = hashPassword(rawPassword, salt);
+  return {
+    ...userConfig,
+    salt,
+    passwordHash,
+    rawPasswordFallback: rawPassword
+  };
+}
+
 // Seed in-memory database with pre-populated admin, trainers, and customers
 const db = {
   users: [
-    {
+    createSeededUser({
       username: 'admin',
-      password: 'admin123',
       firstName: 'Admin',
       lastName: 'Manager',
       email: 'admin@healthclub.com',
@@ -27,10 +66,10 @@ const db = {
       role: 'ADMIN',
       facility: [],
       active: true
-    },
-    {
+    }, 'admin123'),
+
+    createSeededUser({
       username: 'trainer_john',
-      password: 'password123',
       firstName: 'John',
       lastName: 'Doe',
       email: 'john@healthclub.com',
@@ -41,10 +80,10 @@ const db = {
       role: 'TRAINER',
       facility: { facilityName: 'Gym' },
       active: true
-    },
-    {
+    }, 'password123'),
+
+    createSeededUser({
       username: 'trainer_sarah',
-      password: 'password123',
       firstName: 'Sarah',
       lastName: 'Smith',
       email: 'sarah@healthclub.com',
@@ -55,10 +94,10 @@ const db = {
       role: 'TRAINER',
       facility: { facilityName: 'Yoga' },
       active: true
-    },
-    {
+    }, 'password123'),
+
+    createSeededUser({
       username: 'trainer_mike',
-      password: 'password123',
       firstName: 'Mike',
       lastName: 'Phelps',
       email: 'mike@healthclub.com',
@@ -69,10 +108,10 @@ const db = {
       role: 'TRAINER',
       facility: { facilityName: 'Swimming' },
       active: true
-    },
-    {
+    }, 'password123'),
+
+    createSeededUser({
       username: 'customer1',
-      password: 'password123',
       firstName: 'Alex',
       lastName: 'Rider',
       email: 'alex@example.com',
@@ -83,10 +122,10 @@ const db = {
       role: 'CUSTOMER',
       facility: [{ facilityName: 'Gym' }, { facilityName: 'Swimming' }],
       active: true
-    },
-    {
+    }, 'password123'),
+
+    createSeededUser({
       username: 'customer2',
-      password: 'password123',
       firstName: 'Emma',
       lastName: 'Watson',
       email: 'emma@example.com',
@@ -97,7 +136,7 @@ const db = {
       role: 'CUSTOMER',
       facility: [{ facilityName: 'Yoga' }],
       active: true
-    }
+    }, 'password123')
   ],
   feedbacks: [
     {
@@ -117,14 +156,18 @@ const db = {
   ]
 };
 
-// Helper to generate JWT token
-const generateToken = (user) => {
+// JWT Token Helper
+function generateToken(user) {
   return jwt.sign(
-    { username: user.username, role: user.role },
+    { username: user.username, role: user.role, email: user.email },
     JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '24h' }
   );
-};
+}
+
+// -------------------------------------------------------------
+// API Endpoints
+// -------------------------------------------------------------
 
 // 1. Health check
 app.get('/', (req, res) => {
@@ -139,9 +182,21 @@ app.get('/', (req, res) => {
 // 2. Authentication: POST /signIn
 app.post('/signIn', (req, res) => {
   const { username, password } = req.body;
-  const user = db.users.find(u => u.username === username && u.password === password);
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and password are required' });
+  }
+
+  const user = db.users.find(u => u.username === username);
 
   if (!user) {
+    return res.status(401).json({ message: 'Invalid username or password' });
+  }
+
+  const isPasswordValid = user.passwordHash
+    ? verifyPassword(password, user.passwordHash, user.salt)
+    : (password === user.rawPasswordFallback);
+
+  if (!isPasswordValid) {
     return res.status(401).json({ message: 'Invalid username or password' });
   }
 
@@ -223,9 +278,14 @@ app.post('/signupUser', (req, res) => {
     ? facility.map(f => typeof f === 'string' ? { facilityName: f } : f)
     : (facility ? [{ facilityName: facility }] : []);
 
+  const rawPass = password || 'password123';
+  const salt = generateSalt();
+  const passwordHash = hashPassword(rawPass, salt);
+
   const newUser = {
     username,
-    password: password || 'password123',
+    salt,
+    passwordHash,
     firstName: firstName || 'First',
     lastName: lastName || 'Last',
     email: email || '',
@@ -249,9 +309,14 @@ app.post('/signupForTrainer', (req, res) => {
 
   const facilityObj = typeof facility === 'string' ? { facilityName: facility } : (facility || { facilityName: 'Gym' });
 
+  const rawPass = password || 'password123';
+  const salt = generateSalt();
+  const passwordHash = hashPassword(rawPass, salt);
+
   const newTrainer = {
     username,
-    password: password || 'password123',
+    salt,
+    passwordHash,
     firstName: firstName || 'First',
     lastName: lastName || 'Last',
     email: email || '',
@@ -274,7 +339,10 @@ app.patch('/changePasswordUser', (req, res) => {
     return res.status(404).json({ message: 'User not found' });
   }
 
-  user.password = password;
+  const salt = generateSalt();
+  user.salt = salt;
+  user.passwordHash = hashPassword(password, salt);
+  delete user.rawPasswordFallback;
   res.json({ message: 'Password changed successfully' });
 });
 
